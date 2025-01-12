@@ -32,28 +32,35 @@ def cron_worker():
     client = None
     attempts = 0
 
-    while RUNNING:
-        try:
-            if client is None or client.isolation_level is None:
-                client = connect_db()
+    try:
+        if client is None or client.isolation_level is None:
+            client = connect_db()
 
-            logging.info("Running PR fetch...")
+        update_leaderboard(client)  # Initialize leaderboard once
+        logging.info("Leaderboard initialized.")
 
-            pr_count = fetch_filtered_prs(client)
-            update_leaderboard(client)
-            logging.info(f"Updated {pr_count} PRs")
+        while RUNNING:
+            try:
+                pr_count = fetch_filtered_prs(client)
+                logging.info(f"Processed {pr_count} new PRs.")
+                attempts = 0
 
-            attempts = 0  # Reset attempts if successful
+            except Exception as e:
+                attempts += 1
+                wait_time = min(60 * (2 ** attempts), 300)
+                logging.error(f"Error in cron job: {str(e)}. Retrying in {wait_time} seconds.")
+                time.sleep(wait_time)
 
-        except Exception as e:
-            attempts += 1
-            wait_time = min(60 * (2 ** attempts), 300)  # Exponential backoff (max 5 min)
-            logging.error(f"Error in cron job: {str(e)}. Retrying in {wait_time} seconds.")
-            time.sleep(wait_time)
+            time.sleep(45 * 60)
 
-        time.sleep(45 * 60)  # Sleep for 45 minutes before the next run
+    except Exception as e:
+        logging.critical(f"Critical failure in cron worker: {str(e)}", exc_info=True)
 
-    logging.info("Cron worker exiting...")
+    finally:
+        if client:
+            client.close()
+        logging.info("Cron worker exited.")
+
 
 if __name__ == "__main__":
     cron_worker()
