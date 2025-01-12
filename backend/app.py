@@ -9,7 +9,7 @@ from dotenv import load_dotenv
 load_dotenv()
 
 app = Flask(__name__)
-CORS(app, supports_credentials=True)
+CORS(app, resources={r"/*": {"origins": "http://localhost:3000"}})
 
 app.secret_key = os.getenv('SECRET_KEY', 'supersecretWOOOOOOOOOOOO')
 
@@ -45,6 +45,7 @@ def callback():
         ensure_db_connection()  # Ensure db.client is valid before use
         github_user = fetch_github_user(db.client, token)
         # logging.debug(f"GitHub user response: {github_user}")
+        session['avatar']=github_user['avatar_url']
 
         # Check if the user is already logged in (based on session)
         if 'github_id' in session and session['github_id'] == github_user['login']:
@@ -65,6 +66,7 @@ def callback():
         # If user not found, ask for email/phone to create new entry
         session['temp_user'] = github_user
         session['temp_token'] = token
+        
         print(session)
         return render_template('email_phone_form.html', github_user=github_user)
 
@@ -156,7 +158,8 @@ def dashboard():
             'username': user[1],
             'email': user[3],
             'contributed_repos': filtered_repos,
-            'pull_requests': pr_list
+            'pull_requests': pr_list,
+            'avatarurl':session['avatar']
         }
 
         return jsonify({'user': user_data})

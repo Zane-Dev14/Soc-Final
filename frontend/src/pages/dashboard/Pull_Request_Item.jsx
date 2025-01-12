@@ -1,7 +1,7 @@
 import React from "react";
 
-const Pull_Request_Item = ({ id, ghLink, status, prLink }) => {
-  const prStatus = status === "Merged" ? "/pr_merged.svg" : "/pr_failed.svg";
+const Pull_Request_Item = ({ ghLink, status, prLink }) => {
+  const prStatus = status === "merged" ? "/pr_merged.svg" : "/pr_failed.svg"; // Update based on backend status
   return (
     <a
       href={prLink}

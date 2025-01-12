@@ -1,43 +1,16 @@
 import React from "react";
 import Pull_Request_Item from "./Pull_Request_Item";
 
-const tempPRs = [
-  {
-    id: 1, // TODO
-    prLink: "https://github.com/subsurface/libdc/pull/69",
-    ghLink: "Adrin7113/College_List",
-    status: "Merged",
-  },
-  {
-    id: 2,
-    prLink: "https://github.com/subsurface/libdc/pull/69",
-    ghLink: "Glitchyi/spotpapers",
-    status: "Open",
-  },
-  {
-    id: 3,
-    prLink: "https://github.com/subsurface/libdc/pull/69",
-    ghLink: "Adrin7113/College_List",
-    status: "Merged",
-  },
-  {
-    id: 4,
-    prLink: "https://github.com/subsurface/libdc/pull/69",
-    ghLink: "Glitchyi/spotpapers",
-    status: "Open",
-  },
-];
-
-const Pull_Requests = () => {
+const Pull_Requests = ({ pullRequests }) => {
   return (
     <div className="h-full">
-      <div className="flex flex-col gap-10 ">
-        {tempPRs.map((repo) => (
+      <div className="flex flex-col gap-10">
+        {pullRequests.map((pr) => (
           <Pull_Request_Item
-            key={repo.id}
-            ghLink={repo.ghLink}
-            status={repo.status}
-            prLink={repo.prLink}
+            key={pr.pr_id}
+            ghLink={pr.repo_name}
+            status={pr.status}
+            prLink={`https://github.com/${pr.repo_name}/pull/${pr.pr_id}`}
           />
         ))}
       </div>
